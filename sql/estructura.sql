@@ -1,16 +1,25 @@
-CREATE DATABASE IF NOT EXISTS agenda;
-USE agenda;
+-- Crear base de datos
+CREATE DATABASE IF NOT EXISTS agenda_contactos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE agenda_contactos;
 
-CREATE TABLE usuarios (
+-- Tabla usuarios para login
+CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(50) NOT NULL UNIQUE,
-    clave VARCHAR(255) NOT NULL
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL, -- para almacenar hash de contraseña
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE contactos (
+-- Tabla contactos
+CREATE TABLE IF NOT EXISTS contactos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100),
+    usuario_id INT NOT NULL, -- para relacionar los contactos con un usuario
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100),
     telefono VARCHAR(20),
     email VARCHAR(100),
-    observaciones TEXT
+    direccion VARCHAR(255),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );

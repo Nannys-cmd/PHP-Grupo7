@@ -1,17 +1,30 @@
 <?php
 session_start();
-include 'db.php';
+require_once 'db.php'; // incluir conexión PDO
 
-$usuario = $_POST['usuario'];
-$clave = $_POST['clave'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Obtener y sanitizar entradas
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+    $password = $_POST['password']; // No se filtra porque el hash es el que importa
 
-$sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND clave = '$clave'";
-$resultado = $conn->query($sql);
+    if (!$email || !$password) {
+        $error = "Por favor, ingresa un email y contraseña válidos.";
+    } else {
+        // Preparar consulta para buscar usuario
+        $stmt = $pdo->prepare("SELECT id, nombre, password FROM usuarios WHERE email = :email LIMIT 1");
+        $stmt->execute(['email' => $email]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($resultado->num_rows > 0) {
-    $_SESSION['usuario'] = $usuario;
-    header("Location: ../dashboard.php");
-} else {
-    echo "Usuario o contraseña incorrectos.";
+        if ($usuario && password_verify($password, $usuario['password'])) {
+            // Login exitoso: crear variables de sesión
+            $_SESSION['user_id'] = $usuario['id'];
+            $_SESSION['user_name'] = $usuario['nombre'];
+            header('Location: ../dashboard.php'); // Redirigir a dashboard
+            exit();
+        } else {
+            $error = "Email o contraseña incorrectos.";
+        }
+    }
 }
 ?>
+<!-- Aquí va el HTML del formulario de login, con mensaje de error si existe -->

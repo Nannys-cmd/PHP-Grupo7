@@ -1,24 +1,27 @@
 <?php
 session_start();
-if (isset($_SESSION['usuario'])) {
-    header("Location: dashboard.php");
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
     exit();
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="es">    
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Login - Agenda de Contactos</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <h2>Iniciar Sesión</h2>
-    <form method="POST" action="php/login.php">
-        <input type="text" name="usuario" placeholder="Usuario" required><br>
-        <input type="password" name="clave" placeholder="Contraseña" required><br>
+    <h1>Login</h1>
+    <form action="php/login.php" method="post">
+        <label>Email: <input type="email" name="email" required /></label><br/>
+        <label>Contraseña: <input type="password" name="password" required /></label><br/>
         <button type="submit">Ingresar</button>
     </form>
+    <?php if (isset($error)): ?>
+        <p style="color:red;"><?= htmlspecialchars($error); ?></p>
+    <?php endif; ?>
 </body>
 </html>
