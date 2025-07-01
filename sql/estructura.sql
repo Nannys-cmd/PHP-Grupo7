@@ -23,3 +23,12 @@ CREATE TABLE IF NOT EXISTS contactos (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+-- Usuario de prueba para login (email: prueba@mail.com / contraseña: 1234)
+INSERT INTO usuarios (nombre, email, password)
+VALUES (
+    'Usuario de Prueba',
+    'prueba@mail.com',
+    '$2y$10$JXzqZcrZQAjXHtFcvfDAUe7uIS7.Q3eA6kVIXGgfkmZ5glXHTvJ9C'
+);
+
