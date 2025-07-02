@@ -1,54 +1,112 @@
 <?php
 session_start();
-if (!isset($_SESSION['usuario'])) {
-  header("Location: ../index.php");
-  exit();
+require_once 'db.php';
+
+// Verificar si el usuario está logueado
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../index.php");
+    exit();
 }
-?>
 
-<!DOCTYPE html>
-<html lang="es">
+// Obtener ID de usuario actual para filtrar contactos
+$userId = $_SESSION['user_id'];
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Mis Contactos</title>
-  <link rel="stylesheet" href="../css/style.css" />
-</head>
+// Acción a realizar (create, read, update, delete)
+$action = $_GET['action'] ?? 'read';
 
-<body>
-  <h2>Agenda de Contactos de <?php echo htmlspecialchars($_SESSION['usuario']); ?></h2>
+// Función para sanitizar inputs
+function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)));
+}
 
-  <table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Teléfono</th>
-        <th>Email</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td data-label="Nombre">Juan Pérez</td>
-        <td data-label="Teléfono">12345678</td>
-        <td data-label="Email">juan@mail.com</td>
-        <td data-label="Acciones">
-          <a href="#">Editar</a> | <a href="#">Eliminar</a>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="Nombre">María Gómez</td>
-        <td data-label="Teléfono">87654321</td>
-        <td data-label="Email">maria@mail.com</td>
-        <td data-label="Acciones">
-          <a href="#">Editar</a> | <a href="#">Eliminar</a>
-        </td>
-      </tr>
-    </tbody>
+switch ($action) {
+    case 'create':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = sanitize($_POST['nombre'] ?? '');
+            $apellido = sanitize($_POST['apellido'] ?? '');
+            $telefono = sanitize($_POST['telefono'] ?? '');
+            $email = sanitize($_POST['email'] ?? '');
+            $direccion = sanitize($_POST['direccion'] ?? '');
 
-  </table>
+            // Validar nombre mínimo
+            if (empty($nombre)) {
+                echo json_encode(['error' => 'El nombre es obligatorio']);
+                exit();
+            }
 
-  <p><a href="../dashboard.php">⬅ Volver al panel</a></p>
-</body>
+            $sql = "INSERT INTO contactos (usuario_id, nombre, apellido, telefono, email, direccion) 
+                    VALUES (:usuario_id, :nombre, :apellido, :telefono, :email, :direccion)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':usuario_id' => $userId,
+                ':nombre' => $nombre,
+                ':apellido' => $apellido,
+                ':telefono' => $telefono,
+                ':email' => $email,
+                ':direccion' => $direccion
+            ]);
 
-</html>
+            echo json_encode(['success' => 'Contacto creado correctamente']);
+        }
+        break;
+
+    case 'read':
+        $sql = "SELECT * FROM contactos WHERE usuario_id = :usuario_id ORDER BY fecha_creacion DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':usuario_id' => $userId]);
+        $contactos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Retornar JSON para frontend o mostrar en tabla si prefieres HTML directo
+        echo json_encode($contactos);
+        break;
+
+    case 'update':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id'] ?? 0);
+            $nombre = sanitize($_POST['nombre'] ?? '');
+            $apellido = sanitize($_POST['apellido'] ?? '');
+            $telefono = sanitize($_POST['telefono'] ?? '');
+            $email = sanitize($_POST['email'] ?? '');
+            $direccion = sanitize($_POST['direccion'] ?? '');
+
+            if ($id <= 0 || empty($nombre)) {
+                echo json_encode(['error' => 'ID o nombre inválido']);
+                exit();
+            }
+
+            $sql = "UPDATE contactos SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
+                    email = :email, direccion = :direccion WHERE id = :id AND usuario_id = :usuario_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':nombre' => $nombre,
+                ':apellido' => $apellido,
+                ':telefono' => $telefono,
+                ':email' => $email,
+                ':direccion' => $direccion,
+                ':id' => $id,
+                ':usuario_id' => $userId
+            ]);
+
+            echo json_encode(['success' => 'Contacto actualizado correctamente']);
+        }
+        break;
+
+    case 'delete':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                echo json_encode(['error' => 'ID inválido']);
+                exit();
+            }
+
+            $sql = "DELETE FROM contactos WHERE id = :id AND usuario_id = :usuario_id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $id, ':usuario_id' => $userId]);
+
+            echo json_encode(['success' => 'Contacto eliminado correctamente']);
+        }
+        break;
+
+    default:
+        echo json_encode(['error' => 'Acción no válida']);
+}

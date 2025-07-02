@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
+    header("Location: dashboard.php");
     exit();
 }
 ?>
@@ -9,19 +9,20 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Login - Agenda de Contactos</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Iniciar Sesión - Agenda de Contactos</title>
 </head>
 <body>
-    <h1>Login</h1>
-    <form action="php/login.php" method="post">
-        <label>Email: <input type="email" name="email" required /></label><br/>
-        <label>Contraseña: <input type="password" name="password" required /></label><br/>
-        <button type="submit">Ingresar</button>
-    </form>
-    <?php if (isset($error)): ?>
-        <p style="color:red;"><?= htmlspecialchars($error); ?></p>
+    <h2>Iniciar Sesión</h2>
+    <?php if (isset($_GET['error'])): ?>
+        <p style="color:red;"><?php echo htmlspecialchars($_GET['error']); ?></p>
     <?php endif; ?>
+<form action="php/login.php" method="POST">
+  <input type="email" name="email" placeholder="Email" required><br>
+  <input type="password" name="password" placeholder="Contraseña" required><br>
+  <button type="submit">Ingresar</button>
+</form>
+
 </body>
 </html>

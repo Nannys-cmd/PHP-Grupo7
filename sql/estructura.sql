@@ -1,5 +1,5 @@
 -- Crear base de datos
-CREATE DATABASE IF NOT EXISTS agenda_contactos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS agenda CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE agenda_contactos;
 
 -- Tabla usuarios para login

@@ -3,9 +3,10 @@
 
 // Datos para conexión - cambiar según hosting o configuración local
 $host = 'localhost';
-$dbname = 'agenda_contactos';
-$user = 'tu_usuario';
-$pass = 'tu_contraseña';
+$dbname = 'agenda';
+$user = 'root';
+$pass = '2209';
+$port = 3306;
 
 try {
     // Crear instancia PDO con charset utf8mb4 para evitar problemas con caracteres especiales
